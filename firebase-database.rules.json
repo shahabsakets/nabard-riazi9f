@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "rooms": {
+      "$code": {
+        ".read": "auth != null && (data.child('status').val() === 'waiting' || data.child('hostUid').val() === auth.uid || data.child('guestUid').val() === auth.uid)",
+        ".write": "auth != null && ((!data.exists() && newData.child('hostUid').val() === auth.uid && newData.child('guestUid').val() === null && newData.child('status').val() === 'waiting') || (data.exists() && data.child('status').val() === 'waiting' && data.child('guestUid').val() === null && newData.child('guestUid').val() === auth.uid && newData.child('hostUid').val() === data.child('hostUid').val()) || (data.exists() && data.child('hostUid').val() === auth.uid && newData.child('status').val() === 'closed') || (data.exists() && (data.child('hostUid').val() === auth.uid || data.child('guestUid').val() === auth.uid) && newData.child('status').val() === 'forfeit'))",
+        "answers": {
+          "$round": {
+            "$side": {
+              ".write": "auth != null && root.child('rooms').child($code).child('status').val() === 'playing' && !data.exists() && newData.hasChildren(['answer_no','remaining']) && (($side === 'h' && root.child('rooms').child($code).child('hostUid').val() === auth.uid) || ($side === 'g' && root.child('rooms').child($code).child('guestUid').val() === auth.uid))",
+              ".validate": "newData.hasChildren(['answer_no','remaining'])",
+              "answer_no": {
+                ".validate": "newData.isNumber() && newData.val() >= -1 && newData.val() <= 3"
+              },
+              "remaining": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
